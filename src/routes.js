@@ -3,35 +3,31 @@ import Main from './views/Main';
 import Secret from './views/Secret';
 import Callback from './views/Callback';
 import NotFound from './views/NotFound';
-import Header from './components/Header';
 import { Route, Switch } from 'react-router-dom';
+import Auth from './Auth';
+const auth = new Auth();
 
 class Routes extends Component {
-  constructor(props) {
-    // Required step: always call the parent class' constructor
-    super(props);
-
-    // Set the state directly. Use props if necessary.
-    this.state = {
-      name: 'TestName',
-    };
-  }
-
-  // props are router props.
-  // this.props are component props.
-  mainComponent = (props) => {
-    return <Main {...props} {...this.props} />;
+  state = {
+    name: '',
   };
+  setName = () => {
+    const newName = auth.getProfile().given_name || 'Visitor';
+    this.setState({ name: newName });
+  };
+
+  mainComponent = () => <Main name={this.state.name} setName={this.setName} />;
+  secretComponent = () => <Secret name={this.state.name} setName={this.setName} />;
+  notFoundComponent = () => <NotFound name={this.state.name} />;
 
   render() {
     return (
       <div>
-        <Header {...this.props} />
         <Switch>
           <Route exact path="/" render={this.mainComponent} />
-          <Route exact path="/secret" component={Secret} />
+          <Route exact path="/secret" render={this.secretComponent} />
           <Route exact path="/callback" component={Callback} />
-          <Route component={NotFound} />
+          <Route render={this.notFoundComponent} />
         </Switch>
       </div>
     );
