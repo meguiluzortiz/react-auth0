@@ -1,11 +1,16 @@
 import auth0 from 'auth0-js';
 import jwtDecode from 'jwt-decode';
 
+const { protocol, host } = window.location;
+const redirectUri = `${protocol}//${host}/callback`;
+console.log('REDIRECT_URI', redirectUri);
+
 export default class Auth {
   auth0 = new auth0.WebAuth({
     domain: 'meguiluzortiz.us.auth0.com',
     clientID: 'I3LrxjpHgEmjsyLQqmdpZckrW6XAkvOA',
     responseType: 'token id_token',
+    redirectUri,
   });
 
   constructor() {
@@ -25,12 +30,14 @@ export default class Auth {
           reject(err);
         }
 
-        const { accessToken, idToken, expiresIn } = result;
-        const expiresAt = JSON.stringify(expiresIn) * 1000 + new Date().getTime();
-        localStorage.setItem('access_token', accessToken);
-        localStorage.setItem('id_token', idToken);
-        localStorage.setItem('expires_at', expiresAt);
-        resolve();
+        if (result) {
+          const { accessToken, idToken, expiresIn } = result;
+          const expiresAt = JSON.stringify(expiresIn) * 1000 + new Date().getTime();
+          localStorage.setItem('access_token', accessToken);
+          localStorage.setItem('id_token', idToken);
+          localStorage.setItem('expires_at', expiresAt);
+          resolve();
+        }
       });
     });
   }
